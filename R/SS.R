@@ -25,46 +25,47 @@
 # of periods TT
 ######################################################################
 
-sum.SS <- function(x, ...)
-{
-    h <- x$h
-    N <- length(x$ss.sample)
-    ss <- x$ss.sample
-    TTh <- virtual(x$ss.sample[[1]])$Length
-    TT <- TTh/(h-1)
+sum.SS <- function(x, ...) {
+  h <- x$h
+  N <- length(x$ss.sample)
+  ss <- x$ss.sample
+  TTh <- virtual(x$ss.sample[[1]])$Length
+  TT <- TTh / (h - 1)
 
-    # Now find the sums
-    sums <- apply(matrix(unlist(lapply(x$ss.sample, as.integer)), nrow=TTh, ncol=N), 1, sum)
-    sums <- matrix(sums, TT, h-1)
-    sums <- cbind(sums, rep(N, TT) - rowSums(sums))  # Recover the h'th regime
-    return(sums)
+  # Now find the sums
+  sums <- apply(matrix(unlist(lapply(x$ss.sample, as.integer)), nrow = TTh, ncol = N), 1, sum)
+  sums <- matrix(sums, TT, h - 1)
+  sums <- cbind(sums, rep(N, TT) - rowSums(sums)) # Recover the h'th regime
+  return(sums)
 }
 
 
 ######################################################################
 # Mean regime probability for each state
 ######################################################################
-mean.SS <- function(x, ...){
-    sums <- sum.SS(x)
-    N <- length(x$ss.sample)
-    return(sums/N)
+mean.SS <- function(x, ...) {
+  sums <- sum.SS(x)
+  N <- length(x$ss.sample)
+  return(sums / N)
 }
 
 ######################################################################
 # Plot the mean posterior regime probabilities
 ######################################################################
 
-plot.SS <- function(x, ylab="State Probabilities", ...)
-{
-    tmp <- mean.SS(x)
-    shift <- x$p/attr(x, "freq")
-    plot(ts(tmp,
-            start=attr(x, "start")+shift,
-            end=attr(x, "end"), frequency=attr(x, "freq")),
-###            deltat=attr(x, "freq")),
-         plot.type="single", col=1:ncol(tmp),
-         ylim=c(0,1), ylab=ylab, ...)
-    abline(h=0.5, lty=2, ...)
+plot.SS <- function(x, ylab = "State Probabilities", ...) {
+  tmp <- mean.SS(x)
+  shift <- x$p / attr(x, "freq")
+  plot(
+    ts(tmp,
+      start = attr(x, "start") + shift,
+      end = attr(x, "end"), frequency = attr(x, "freq")
+    ),
+    ###            deltat=attr(x, "freq")),
+    plot.type = "single", col = 1:ncol(tmp),
+    ylim = c(0, 1), ylab = ylab, ...
+  )
+  abline(h = 0.5, lty = 2, ...)
 }
 
 # Legacy R code version of some state-space generation functions --

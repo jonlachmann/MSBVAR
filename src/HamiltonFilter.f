@@ -57,6 +57,7 @@ c           Recall dimensions of tmpfit(1,m)
      &                          matmultwo, 1)
             ylik(itert:itert,:,iterh) = EXP(-(REAL(m)/2.0)*LOG(2.0*pi) 
      &           - (1.0/2.0)*LOG(detsig2) - (1.0/2.0)*matmultwo)
+            write(*,*) matmultwo
          END DO
       END DO
 

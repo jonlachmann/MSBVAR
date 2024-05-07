@@ -16,68 +16,68 @@
 
 "coef.forecast.VAR" <- function(object, intercept, ar.coefs,
                                 exog.coefs, m, p, capT, nsteps,
-                                A0=t(chol(object$mean.S)),
-                                shocks=matrix(0,nrow=nsteps,ncol=m),
-                                exog.fut=matrix(0,nrow=nsteps,ncol=nrow(exog.coefs)),
-                                ...)
-{
-  yhat<-rbind(object,matrix(0,ncol=m,nrow=nsteps))
+                                A0 = t(chol(object$mean.S)),
+                                shocks = matrix(0, nrow = nsteps, ncol = m),
+                                exog.fut = matrix(0, nrow = nsteps, ncol = nrow(exog.coefs)),
+                                ...) {
+  yhat <- rbind(object, matrix(0, ncol = m, nrow = nsteps))
 
-   # Compute the deterministic part of the forecasts (less the intercept!)
-   if(is.na(sum(exog.coefs))==F)
-     {
-       deterministic.var <- as.matrix(exog.fut) %*% exog.coefs
-     }
-   else
-     { deterministic.var <- matrix(0,nrow=nsteps,ncol=m)
-     }
+  # Compute the deterministic part of the forecasts (less the intercept!)
+  if (is.na(sum(exog.coefs)) == F) {
+    deterministic.var <- as.matrix(exog.fut) %*% exog.coefs
+  } else {
+    deterministic.var <- matrix(0, nrow = nsteps, ncol = m)
+  }
 
-   # Now loop over the forecast horizon
-   for(h in 1:nsteps)
-     {  yhat[capT + h, ] <- (yhat[capT + h - 1,] %*% ar.coefs[,,1] +
-                             intercept + deterministic.var[h,] + (shocks[h,]%*%A0))
-       if (p>1) {for(i in 2:p)
-       { yhat[capT + h, ] <- (yhat[capT + h, ] +
-                              (yhat[capT + h - i, ] %*% ar.coefs[,,i]))
-
-       }}
-     }
-   return(ts(yhat))
- }
+  # Now loop over the forecast horizon
+  for (h in 1:nsteps)
+  {
+    yhat[capT + h, ] <- (yhat[capT + h - 1, ] %*% ar.coefs[, , 1] +
+      intercept + deterministic.var[h, ] + (shocks[h, ] %*% A0))
+    if (p > 1) {
+      for (i in 2:p)
+      {
+        yhat[capT + h, ] <- (yhat[capT + h, ] +
+          (yhat[capT + h - i, ] %*% ar.coefs[, , i]))
+      }
+    }
+  }
+  return(ts(yhat))
+}
 
 # list.print function --- used to recursively print the list objects
 # in the printing of the VAR objects for users.
 
-"list.print" <- function(x)
-{
-    if(is.list(x$values)){
-        cat("==========================================\n")
-        cat(x$labels[1],"\n")
-        cat("==========================================\n")
-        for(i in 1:length(x$values)) list.print(x$values[[i]])
-    } else {
-        if(length(dim(x$values))==3){
-            cat(x$labels[1],": \n",sep="")
-            for(j in 1:dim(x$values)[3]){
-                cat("B(", j, ")\n", sep="")
-                prmatrix(x$values[,,j])
-                cat("\n")
-            }
-        } else if(length(dim(x$values))==2) {
-            cat(x$labels[1],": \n",sep="")
-            prmatrix(x$values)
-        } else if(is.null(dim(x$values))){
-            if ((length(x$values)/length(x$labels))==1){
-                for(i in 1:length(x$values))
-                    cat(x$labels[i], ":    ", x$values[i], "\n")
-            } else {
-                cat(x$labels[1],":\n")
-                for(i in 1:length(x$values)) cat(x$values[i], "\t")
-                cat("\n")
-            }
+"list.print" <- function(x) {
+  if (is.list(x$values)) {
+    cat("==========================================\n")
+    cat(x$labels[1], "\n")
+    cat("==========================================\n")
+    for (i in 1:length(x$values)) list.print(x$values[[i]])
+  } else {
+    if (length(dim(x$values)) == 3) {
+      cat(x$labels[1], ": \n", sep = "")
+      for (j in 1:dim(x$values)[3]) {
+        cat("B(", j, ")\n", sep = "")
+        prmatrix(x$values[, , j])
+        cat("\n")
+      }
+    } else if (length(dim(x$values)) == 2) {
+      cat(x$labels[1], ": \n", sep = "")
+      prmatrix(x$values)
+    } else if (is.null(dim(x$values))) {
+      if ((length(x$values) / length(x$labels)) == 1) {
+        for (i in 1:length(x$values)) {
+          cat(x$labels[i], ":    ", x$values[i], "\n")
         }
-        cat("------------------------------------------\n")
+      } else {
+        cat(x$labels[1], ":\n")
+        for (i in 1:length(x$values)) cat(x$values[i], "\t")
+        cat("\n")
+      }
     }
+    cat("------------------------------------------\n")
+  }
 }
 
 
@@ -110,13 +110,12 @@
 
 # posterior fit measures for szbvar
 "posterior.fit.szbvar" <-
-function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
-  {
+  function(capT, m, ncoef, num.exog, nu, H0, S0, Y, X, hstar1, Sh, u, Bh, Sh1) {
     # Compute the marginal posterior LL value
     # For the derivation of the integrand see Zellner 1971, Section 8.2
 
     scalefactor <- (sum(lgamma(nu + 1 - seq(1:m))) -
-                    sum(lgamma(nu + capT + 1 - seq(1:m))))
+      sum(lgamma(nu + capT + 1 - seq(1:m))))
 
     # Find some log-dets to make the final computation easier.
     # This does depend on the prior chosen, since some of these
@@ -124,62 +123,64 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
     # the S0 mtx will be zero.
     # This is done with if-else statements.
 
-    M0 <- (diag(capT) + X%*%solve(H0)%*%t(X))
-    B0 <- matrix(0,nrow=(ncoef+num.exog),ncol=m)
+    M0 <- (diag(capT) + X %*% solve(H0) %*% t(X))
+    B0 <- matrix(0, nrow = (ncoef + num.exog), ncol = m)
     diag(B0) <- 1
-    Bdiff <- Y-X%*%B0
+    Bdiff <- Y - X %*% B0
 
-    ld.S0 <- determinant(S0, logarithm=T)
+    ld.S0 <- determinant(S0, logarithm = T)
     ld.S0 <- ld.S0$sign * ld.S0$modulus
 
-    ld.M0 <- determinant(M0, logarithm=T)
+    ld.M0 <- determinant(M0, logarithm = T)
     ld.M0 <- ld.M0$sign * ld.M0$modulus
 
-    ld.tmp <- determinant((S0 + t(Bdiff)%*%solve(M0)%*%Bdiff), logarithm=T)
+    ld.tmp <- determinant((S0 + t(Bdiff) %*% solve(M0) %*% Bdiff), logarithm = T)
     ld.tmp <- ld.tmp$sign * ld.tmp$modulus
 
-    data.marg.llf <-  (- 0.5*capT*m*log(2*pi)
-                 - m*0.5*ld.M0
-                 + capT*0.5*ld.S0
-                 - scalefactor
-                 - 0.5*(nu+capT)*ld.tmp)
+    data.marg.llf <- (-0.5 * capT * m * log(2 * pi)
+      - m * 0.5 * ld.M0
+      + capT * 0.5 * ld.S0
+      - scalefactor
+      - 0.5 * (nu + capT) * ld.tmp)
 
     # Now find the predictive posterior density
-    M1 <- (diag(capT) + X%*%solve(hstar1)%*%t(X))
+    M1 <- (diag(capT) + X %*% solve(hstar1) %*% t(X))
 
-    ld.S1 <- determinant(Sh, logarithm=T)
+    ld.S1 <- determinant(Sh, logarithm = T)
     ld.S1 <- ld.S1$sign * ld.S1$modulus
 
-    ld.M1 <- determinant(M1, logarithm=T)
+    ld.M1 <- determinant(M1, logarithm = T)
     ld.M1 <- ld.M1$sign * ld.M1$modulus
 
-    ld.tmp <- determinant((Sh + t(u)%*%solve(M1)%*%u), logarithm=T)
+    ld.tmp <- determinant((Sh + t(u) %*% solve(M1) %*% u), logarithm = T)
     ld.tmp <- ld.tmp$sign * ld.tmp$modulus
 
-    data.marg.post <- (- 0.5*capT*m*log(2*pi)
-                 - m*0.5*ld.M1
-                 + capT*0.5*ld.S1
-                 - scalefactor
-                 - 0.5*(nu+capT)*ld.tmp)
+    data.marg.post <- (-0.5 * capT * m * log(2 * pi)
+      - m * 0.5 * ld.M1
+      + capT * 0.5 * ld.S1
+      - scalefactor
+      - 0.5 * (nu + capT) * ld.tmp)
 
     # Now compute the marginal llf and the posterior for the
     # coefficients
     Bdiff <- B0 - Bh
-    ld.S1 <- determinant(Sh1, logarithm=T)
+    ld.S1 <- determinant(Sh1, logarithm = T)
     ld.S1 <- ld.S1$sign * ld.S1$modulus
     wdof <- capT - ncoef - num.exog - m - 1
 
-    scalefactor1 <- (wdof*m*0.5)*log(2) + 0.25*m*(m-1) + (sum(lgamma(wdof + 1 - seq(1:m))))
-    scalefactor2 <- -0.5*(ncoef*m)*log(2*pi)
-    coef.post <- (scalefactor1 + scalefactor2 -0.5*(nu + capT + m +1)*ld.S1
-                  - 0.5*sum(diag(solve(Sh1)%*%Sh))
-                  - 0.5*(ncoef+num.exog)*ld.S1
-                  - 0.5*sum(diag(Sh1%*%t(Bdiff)%*%hstar1%*%Bdiff)))
+    scalefactor1 <- (wdof * m * 0.5) * log(2) + 0.25 * m * (m - 1) + (sum(lgamma(wdof + 1 - seq(1:m))))
+    scalefactor2 <- -0.5 * (ncoef * m) * log(2 * pi)
+    coef.post <- (scalefactor1 + scalefactor2 - 0.5 * (nu + capT + m + 1) * ld.S1
+      - 0.5 * sum(diag(solve(Sh1) %*% Sh))
+      - 0.5 * (ncoef + num.exog) * ld.S1
+      - 0.5 * sum(diag(Sh1 %*% t(Bdiff) %*% hstar1 %*% Bdiff)))
 
 
-    return(list(data.marg.llf=data.marg.llf,
-                data.marg.post=data.marg.post,
-                coef.post=coef.post))
+    return(list(
+      data.marg.llf = data.marg.llf,
+      data.marg.post = data.marg.post,
+      coef.post = coef.post
+    ))
   }
 
 
@@ -193,25 +194,27 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
 # H0inv.posterior = m-array of the covariances for the columns of the
 # A0 matrix.
 
-"A0.llf" <- function(b, Ui, df, H0inv.posterior)
-{     m <- length(H0inv.posterior)
-      n0 <- sapply(1:m, function(i) {ncol(as.matrix(Ui[[i]]))})
-      n0cum <- c(0,cumsum(n0))
-      llf <- 0
+"A0.llf" <- function(b, Ui, df, H0inv.posterior) {
+  m <- length(H0inv.posterior)
+  n0 <- sapply(1:m, function(i) {
+    ncol(as.matrix(Ui[[i]]))
+  })
+  n0cum <- c(0, cumsum(n0))
+  llf <- 0
 
-      A0 <- matrix(0, m, m)
-      for (i in 1:m)
-      {
-          bj <- b[(n0cum[i]+1):(n0cum[(i+1)])]
-          A0[, i] <- as.matrix(Ui[[i]])%*%bj
-          llf <- llf + 0.5*(t(bj)%*%H0inv.posterior[[i]]%*%bj)
-      }
+  A0 <- matrix(0, m, m)
+  for (i in 1:m)
+  {
+    bj <- b[(n0cum[i] + 1):(n0cum[(i + 1)])]
+    A0[, i] <- as.matrix(Ui[[i]]) %*% bj
+    llf <- llf + 0.5 * (t(bj) %*% H0inv.posterior[[i]] %*% bj)
+  }
 
-#      tmp <- lu(Matrix(t(A0), sparse=FALSE))
-#      U <- matrix(expand(tmp)$U@x, m, m)
-      U <- qr.R(qr(t(A0)))
-      llf <- llf - df*sum(log(abs(diag(U))))
-      return(llf)
+  #      tmp <- lu(Matrix(t(A0), sparse=FALSE))
+  #      U <- matrix(expand(tmp)$U@x, m, m)
+  U <- qr.R(qr(t(A0)))
+  llf <- llf - df * sum(log(abs(diag(U))))
+  return(llf)
 }
 
 # TRANSLATION FUNCTIONS FOR SQUEEZED PARAMETERS IN structural B-SVAR
@@ -221,63 +224,70 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
 # squeezed parameter vector b_i to a_i using b_i = U_i' a_i as n
 # footnote 11 of W&Z 2003.
 
-"b2a" <- function(b, Ui)
-{ m <- nrow(as.matrix(Ui[[1]]))
-  n0 <- sapply(1:m, function(i) {ncol(as.matrix(Ui[[i]]))})
-  n0cum <- c(0,cumsum(n0))
-  A0 <- matrix(0,m,m)
+"b2a" <- function(b, Ui) {
+  m <- nrow(as.matrix(Ui[[1]]))
+  n0 <- sapply(1:m, function(i) {
+    ncol(as.matrix(Ui[[i]]))
+  })
+  n0cum <- c(0, cumsum(n0))
+  A0 <- matrix(0, m, m)
 
-  for(i in 1:m)
-    {
-      A0[,i] <- as.matrix(Ui[[i]])%*%b[(n0cum[i]+1):(n0cum[(i+1)])]
-    }
+  for (i in 1:m)
+  {
+    A0[, i] <- as.matrix(Ui[[i]]) %*% b[(n0cum[i] + 1):(n0cum[(i + 1)])]
+  }
 
   return(A0)
 }
 
 # A0 = full A0 matrix....
-"a2b" <- function(A0, Ui)
-  { m <- nrow(A0)
-    n0 <- sapply(1:m, function(i) {ncol(as.matrix(Ui[[i]]))})
-    n0cum <- c(0,cumsum(n0))
-    b <- matrix(0, n0cum[length(n0cum)], 1)
+"a2b" <- function(A0, Ui) {
+  m <- nrow(A0)
+  n0 <- sapply(1:m, function(i) {
+    ncol(as.matrix(Ui[[i]]))
+  })
+  n0cum <- c(0, cumsum(n0))
+  b <- matrix(0, n0cum[length(n0cum)], 1)
 
-    for(i in 1:m)
-      {
-        b[(n0cum[i]+1):(n0cum[(i+1)])] <- t(as.matrix(Ui[[i]]))%*%A0[,i]
-      }
-    return(b)
+  for (i in 1:m)
+  {
+    b[(n0cum[i] + 1):(n0cum[(i + 1)])] <- t(as.matrix(Ui[[i]])) %*% A0[, i]
   }
+  return(b)
+}
 
 
 # Set up function for the Gibbs sampler for A0 for szbsvar()
 # and gibbs.A0().  Input is a fitted szbsvar() object.
 
-"gibbs.setup.bsvar" <- function(szbvar.obj)
-  {  # Compute some objects we need for inputs for the Gibbs sampler
-     # for the B-SVAR models
-    m <- ncol(szbvar.obj$A0.mode)
-     # T_i* = decomposition of the qi x qi covariance of the squeezed A0
-     #        parameters for each equation
+"gibbs.setup.bsvar" <- function(szbvar.obj) { # Compute some objects we need for inputs for the Gibbs sampler
+  # for the B-SVAR models
+  m <- ncol(szbvar.obj$A0.mode)
+  # T_i* = decomposition of the qi x qi covariance of the squeezed A0
+  #        parameters for each equation
 
-    Tinv <- sapply(1:m, function(i)
-                   {chol(szbvar.obj$H0inv.posterior[[i]]/szbvar.obj$df)},
-                   simplify=F)
+  Tinv <- sapply(1:m, function(i) {
+    chol(szbvar.obj$H0inv.posterior[[i]] / szbvar.obj$df)
+  },
+  simplify = F
+  )
 
-    # UT = m x qi matrix in equation 14 of WZ JEDC --- eqn 14.
-    UT <- sapply(1:m, function(i)
-                 {szbvar.obj$Ui[[i]]%*%solve(Tinv[[i]])},
-                 simplify=F)
+  # UT = m x qi matrix in equation 14 of WZ JEDC --- eqn 14.
+  UT <- sapply(1:m, function(i) {
+    szbvar.obj$Ui[[i]] %*% solve(Tinv[[i]])
+  },
+  simplify = F
+  )
 
-   ##  # inverse cholesky of Hpinv.posterior
-##     VHphalf <- sapply(1:m, function(i)
-##                       {solve(chol(H0inv.posterior[[i]]))}, simplify=F)
-##     # Squeezed posterior of the parameters
-##     PU <- sapply(1:m, function(i) { P.posterior[[i]]%*%t(Ui[[i]]) }, simplify=F )
-##     VPU <- PU
-##
-    return(list(UT=UT, Tinv=Tinv))
-  }
+  ##  # inverse cholesky of Hpinv.posterior
+  ##     VHphalf <- sapply(1:m, function(i)
+  ##                       {solve(chol(H0inv.posterior[[i]]))}, simplify=F)
+  ##     # Squeezed posterior of the parameters
+  ##     PU <- sapply(1:m, function(i) { P.posterior[[i]]%*%t(Ui[[i]]) }, simplify=F )
+  ##     VPU <- PU
+  ##
+  return(list(UT = UT, Tinv = Tinv))
+}
 
 
 # Functions to "flatten" or conserve A0 storage and rebuild the
@@ -289,11 +299,15 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
 ##     return(A0.flat)
 ## }
 
-"A0.get" <- function(A0,index){
-    if(index==1) {st <- 1} else {st <- 1 + (index-1)*length(A0$struct)}
-    A0.out <- vector(mode="numeric",length=(A0$m*A0$m))
-    A0.out[A0$struct] <- A0$A0[st:(st+length(A0$struct)-1)]
-    return(matrix(A0.out,nrow=A0$m))
+"A0.get" <- function(A0, index) {
+  if (index == 1) {
+    st <- 1
+  } else {
+    st <- 1 + (index - 1) * length(A0$struct)
+  }
+  A0.out <- vector(mode = "numeric", length = (A0$m * A0$m))
+  A0.out[A0$struct] <- A0$A0[st:(st + length(A0$struct) - 1)]
+  return(matrix(A0.out, nrow = A0$m))
 }
 
 # Functions to "flatten" or conserve W storage and rebuild the W
@@ -350,19 +364,22 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
 ##     return(W.list)
 ## }
 
-"W.get" <- function(W,index)
-{
-    start.index <- (index-1) * W$m + 1
-    end.index <- start.index + W$m - 1
-    Wout <- vector(mode="list",length=W$m)
-    if(index==1){tmp.index <- 0}else{tmp.index <- W$W.index[(start.index-1)]}
-    for(i in start.index:end.index){
-        dim.w <- sqrt(W$W.index[i]-tmp.index)
-        w <- matrix(W$W[(tmp.index+1):W$W.index[i]],nrow=dim.w)
-        Wout[[(i-start.index+1)]] <- w
-        tmp.index <- W$W.index[i]
-    }
-    return(Wout)
+"W.get" <- function(W, index) {
+  start.index <- (index - 1) * W$m + 1
+  end.index <- start.index + W$m - 1
+  Wout <- vector(mode = "list", length = W$m)
+  if (index == 1) {
+    tmp.index <- 0
+  } else {
+    tmp.index <- W$W.index[(start.index - 1)]
+  }
+  for (i in start.index:end.index) {
+    dim.w <- sqrt(W$W.index[i] - tmp.index)
+    w <- matrix(W$W[(tmp.index + 1):W$W.index[i]], nrow = dim.w)
+    Wout[[(i - start.index + 1)]] <- w
+    tmp.index <- W$W.index[i]
+  }
+  return(Wout)
 }
 
 ############################################
@@ -371,27 +388,26 @@ function(capT,m,ncoef,num.exog,nu,H0,S0,Y,X,hstar1,Sh,u, Bh,Sh1)
 
 # Get the long run regime probabilities from transition matrix P
 
-steady.Q <- function(P)
-  { M <- dim(P)[1]
-    if (M<3)
-      {
-        eta <- solve(rbind(cbind(1 - P[1,1], P[2,1]), rep(1,2)))%*%matrix(c(0,1))
-      }
-    else
-      {
-        eta <- solve(rbind(cbind(diag(M-1) - t(P)[1:(M-1),1:(M-1)],
-                                 t(P)[1:(M-1),M]),
-                           rep(1,M)))%*%matrix(c(rep(0,M-1),1))
-
-      }
-    # Find the steady state if there are negative values -- that is
-    # iterate a bit!
-    while(cumprod(eta)[M]<0)
-      {
-        eta <- t(P)%*%eta
-      }
-    return(eta)
+steady.Q <- function(P) {
+  M <- dim(P)[1]
+  if (M < 3) {
+    eta <- solve(rbind(cbind(1 - P[1, 1], P[2, 1]), rep(1, 2))) %*% matrix(c(0, 1))
+  } else {
+    eta <- solve(rbind(
+      cbind(
+        diag(M - 1) - t(P)[1:(M - 1), 1:(M - 1)],
+        t(P)[1:(M - 1), M]
+      ),
+      rep(1, M)
+    )) %*% matrix(c(rep(0, M - 1), 1))
   }
+  # Find the steady state if there are negative values -- that is
+  # iterate a bit!
+  while (cumprod(eta)[M] < 0) {
+    eta <- t(P) %*% eta
+  }
+  return(eta)
+}
 
 
 

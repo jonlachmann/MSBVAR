@@ -1,39 +1,36 @@
 # General plot Function to genrate simple black and white plots
 
 "plot.forecast" <- function(x, ...)
-#identify the type of forecast
+# identify the type of forecast
 {
-  if(inherits(x, "forecast.VAR")){
+  if (inherits(x, "forecast.VAR")) {
     return(plot.forecast.VAR(x = x, ...))
-    }
+  }
 
-  if(inherits(x, "forecast.BVAR")){
+  if (inherits(x, "forecast.BVAR")) {
     return(plot.forecast.BVAR(x = x, ...))
-    }
+  }
 
-  if(inherits(x, "forecast.BSVAR")){
+  if (inherits(x, "forecast.BSVAR")) {
     return(plot.forecast.BSVAR(x = x, ...))
-    }
-
+  }
 }
 
-#Plot for VAR type forecasts
-"plot.forecast.VAR" <- function(x, ...){
+# Plot for VAR type forecasts
+"plot.forecast.VAR" <- function(x, ...) {
   m <- dim(x)[2]
   par(mfrow = c(m, 1))
-  for(columns in 1:m){
-    fcast <- ts(cbind(x[,columns]), start = start(x), frequency = frequency(x))
+  for (columns in 1:m) {
+    fcast <- ts(cbind(x[, columns]), start = start(x), frequency = frequency(x))
     plot(fcast, ylab = colnames(x)[columns], ...)
-    }
+  }
 }
 
-"plot.forecast.BVAR" <- function(x, ...)
-{
+"plot.forecast.BVAR" <- function(x, ...) {
   output <- plot.forecast.VAR(x, ...)
 }
 
-"plot.forecast.BSVAR" <- function(x, ...)
-{
+"plot.forecast.BSVAR" <- function(x, ...) {
   output <- plot.forecast.VAR(x)
 }
 
@@ -109,4 +106,3 @@
 ##       }
 ## #    par(oldpar)
 ##   }
-

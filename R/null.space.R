@@ -1,5 +1,4 @@
-
-"null.space" <- function(x)
-  { tmp <- svd(x)
-    return(tmp$v[,which(tmp$d!=0)])
-  }
+"null.space" <- function(x) {
+  tmp <- svd(x)
+  return(tmp$v[, which(tmp$d != 0)])
+}
