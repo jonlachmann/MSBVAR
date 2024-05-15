@@ -208,7 +208,6 @@ blkopt <- function(Y, p, thetahat.start, Qhat.start, niter = 10, indms) {
   }
 
   # Using residuals, get filtered regime probabilities
-  # HamFilt <- filter.Hamresid(e, sig2.it, Qhat.it)  # R code
   firstHamFilt <- HamiltonFilter(
     bigt = as.integer(n),
     m = as.integer(m), p = as.integer(p),
@@ -338,7 +337,6 @@ blkopt <- function(Y, p, thetahat.start, Qhat.start, niter = 10, indms) {
   }
 
   # Using residuals, get filtered regime probabilities
-  # HamFilt <- filter.Hamresid(e, sig2.it, Qhat.it)  # R code
   lastHamFilt <- HamiltonFilter(
     bigt = as.integer(n),
     m = as.integer(m), p = as.integer(p), h = as.integer(h),
@@ -463,7 +461,6 @@ llf.msar <- function(param.opt, Y, X, p, theta, Q, optstr, ms.switch) {
   }
 
   # Using residuals, get filtered regime probabilities
-  # HamFilt <- filter.Hamresid(e, sig2.it, Qhat.it)  # R code
   HamFilt <- HamiltonFilter(
     bigt = as.integer(n),
     m = as.integer(m), p = as.integer(p), h = as.integer(h),
@@ -476,9 +473,6 @@ llf.msar <- function(param.opt, Y, X, p, theta, Q, optstr, ms.switch) {
 
   return(-f) # optim() minimizes negative
 }
-
-
-
 
 # This needs to be implemented in C // C++ code later
 BHLK.smoother <- function(fp, Q) {
@@ -619,10 +613,6 @@ hregime.reg2 <- function(h, m, p, fp, init.model) {
 
     Sxy <- crossprod(X1, Y1)
     Sxx <- crossprod(X1)
-
-    ## Sxy <- crossprod(X, diag(fp[,i]))%*%Y
-    ## Sxx <- crossprod(X, diag(fp[,i]))%*%X
-    ## Syx <- crossprod(Y, diag(fp[,i]))%*%X
 
     hstar <- Sxx + init.model$H0 # Regression X'X + Prior
 

@@ -22,7 +22,7 @@ ddirichlet <- function(x, alpha) {
     stop("Mismatch between dimensions of x and alpha in ddirichlet().\n")
   }
   pd <- vector(length = nrow(x))
-  for (i in 1:nrow(x)) pd[i] <- dirichlet1(x[i, ], alpha[i, ])
+  for (i in seq_len(nrow(x))) pd[i] <- dirichlet1(x[i, ], alpha[i, ])
   pd[apply(x, 1, function(z) any(z < 0 | z > 1))] <- 0
   pd[apply(x, 1, function(z) all.equal(sum(z), 1) != TRUE)] <- 0
   return(pd)

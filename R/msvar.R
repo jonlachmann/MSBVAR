@@ -99,9 +99,7 @@ hregime.reg2.mle <- function(h, m, p, TT, fp, init.model) {
     Sxx <- crossprod(X, diag(fp[, i])) %*% X + crossprod(init.model$X[1:(m + 1), ])
 
     # Compute the regression coefficients
-    hstar <- Sxx # + init.model$H0
-    # Bk[,,i] <- solve(hstar,
-    #                  (Sxy + init.model$H0[,1:m]))
+    hstar <- Sxx
     Bk[, , i] <- solve(hstar, Sxy, tol = 1e-100)
 
     # Compute residuals and Sigma (based on Krolzig)
@@ -109,11 +107,10 @@ hregime.reg2.mle <- function(h, m, p, TT, fp, init.model) {
     # Get the full residuals -- need these for filtering
     e[, , i] <- Y - X %*% Bk[, , i]
 
-    # Sigmak[,,i] <- (init.model$S0 + crossprod(e[,,i],diag(fp[,i]))%*%e[,,i])/df[i]
     Sigmak[, , i] <- (crossprod(e[, , i], diag(fp[, i])) %*% e[, , i]) / df[i]
 
     # Save the moments
-    tmp[[i]] <- list(Sxy = Sxy, Sxx = Sxx) # , ytmp=ytmp, xtmp=xtmp)
+    tmp[[i]] <- list(Sxy = Sxy, Sxx = Sxx)
   }
 
   return(list(Bk = Bk, Sigmak = Sigmak, df = df, e = e, moment = tmp))

@@ -29,31 +29,84 @@ HamiltonFilter <- function(bigt, m, p, h, e, sig2, Qhat) {
 
   f <- 0.0
   pytSt1St_t1_itert <- matrix(0, h, h)
-  filt_llfval <- numeric(bigt - p)
   filtprSt1St <- array(0, c(bigt - p, h, h))
 
   for (its in seq_len(bigt - p)) {
-    filt_llfval[its] <- 0
     for (i in seq_len(h)) {
       for (j in seq_len(h)) {
         pytSt1St_t1_itert[i, j] <- pSt1_t1[i] * ypwlik[its, i, j]
-        filt_llfval[its] <- filt_llfval[its] + pytSt1St_t1_itert[i, j]
       }
     }
-    f <- f + log(filt_llfval[its])
+    filt_llfval <- sum(pytSt1St_t1_itert)
+    f <- f + log(filt_llfval)
 
-    pytSt1St_t1_itert <- pytSt1St_t1_itert / filt_llfval[its]
+    pytSt1St_t1_itert <- pytSt1St_t1_itert / filt_llfval
 
     filtprSt1St[its, , ] <- pytSt1St_t1_itert
-    for (i in seq_len(h)) {
-      pSt1_t1[i] <- 0
-      for (j in seq_len(h)) {
-        pSt1_t1[i] <- pSt1_t1[i] + pytSt1St_t1_itert[j, i]
-      }
-    }
+    pSt1_t1 <- colSums(pytSt1St_t1_itert)
   }
 
   # integrate over St-1
   filtprSt <- rowSums(filtprSt1St, dim = 2)
   return(list(filtprSt = filtprSt, f = f, e = e))
 }
+
+
+
+ForwardFilter <- function (nvar, bigRk, bigK, bigT, nbeta, sigdraw, xidraw, llh) {
+  llht <- matrix(0, bigT, bigK)
+  lhma <- matrix(0, bigT, bigK)
+
+  for (itk in seq_len(bigK)) {
+    # Setup sigma matrices
+    tmpsig <- sigdraw[, , itk]
+    tmpsigld <- log(abs(det(tmpsig)))
+    tmpsiginv <- solve(tmpsig)
+    for (itt in seq_len(bigT)) {
+      # tmpe = 1 by nvar, with residuals at time itt
+      tmpe <- bigRk[itt, seq_len(nvar), itk]
+      matmultwo <- tmpe %*% tmpsiginv %*% tmpe
+
+      llht[itt, itk] <- -(nvar / 2) * log(2 * pi) - (1 / 2) * tmpsigld - (1 / 2) * matmultwo
+    }
+  }
+
+  # max-adjusted llht for numerical stabilization
+  summaxllh <- 0
+  for (itt in seq_len(bigT)) {
+    # set temporary max to first regime
+    tmpmax <- max(llht[itt, ])
+    summaxllh <- summaxllh + tmpmax
+    for (itk in seq_len(bigK)) {
+      lhma[itt, itk] <- exp(llht[itt, itk] - tmpmax)
+    }
+  }
+
+  # Forward filtering
+  sp <- 0
+  pfilt <- matrix(0, bigT + 1, bigK)
+
+  if (bigK > 1) {
+    pfilt[1, ] <- rep(1 / bigK, bigK)
+
+    transxi <- t(xidraw)
+
+    for (itt in seq_len(bigT)) {
+      ptmp <- transxi %*% pfilt[itt, ] * lhma[itt, ]
+
+      # now to normalize, sum up and divide. these probabilities become
+      # pfilt values at next iteration, t+1
+      st <- sum(ptmp)
+      transptmp <- t(ptmp)
+      pfilt[itt + 1, ] <- transptmp / st
+
+      sp <- sp + log(st)
+    }
+  }
+
+  llh <- sp + summaxllh
+
+  return(list(pfilt = pfilt, llh = llh))
+}
+
+

@@ -141,13 +141,14 @@ Q.drawGibbs <- function(Q, SStrans, prior, h) {
 SS.ffbs <- function(e, bigt, m, p, h, sig2, Q) {
   # Hamilton's forward filter
 
-  ff <- .Fortran("ForwardFilter",
-    nvar = as.integer(m), e = e,
-    bigK = as.integer(h), bigT = as.integer(bigt),
+  ff <- ForwardFilter(
+    nvar = as.integer(m),
+    bigRk = e,
+    bigK = as.integer(h),
+    bigT = as.integer(bigt),
     nbeta = as.integer(1 + m * p),
-    sig2, Q,
-    llh = double(1),
-    pfilt = matrix(0, bigt + 1, h)
+    sig2,
+    Q
   )
 
   # Backwards multi-move sampler
@@ -680,64 +681,3 @@ gibbs.msbvar <- function(x, N1 = 1000, N2 = 1000,
 
   return(output)
 }
-
-################################################################
-# Deprecated code
-################################################################
-
-# R code for legacy purposes
-# SS.ffbs(e, TT+p, m, p, h, Sigmai, Q)
-# SS.ffbs <- function(e, bigt, m, p, h, sig2, Q)
-# {
-#  TT <- bigt-p
-#
-#  # Forward-filtering
-#  fHam <- .Fortran("HamiltonFilter",
-#                   bigt=as.integer(bigt),
-#                   m = as.integer(m), p = as.integer(p), h = as.integer(h),
-#                   e = e,
-#                   sig2 = sig2,
-#                   Q = Q,
-#                   f = double(1),
-#                   filtprSt = matrix(0,as.integer(TT),as.integer(h))
-#                   )
-#  fpH <- fHam$filtprSt
-#
-#  # Backwards-sampling
-#  SS <- matrix(0, nrow=TT, ncol=h)
-#  SS[TT,] <- bingen(fpH[TT,], Q, 1, h)
-#  for (t in (TT-1):1)
-#  {
-#    SS[t,] <- bingen(fpH[t,], Q, which(SS[t+1,]==1), h)
-#  }
-#
-#  # Construct STT (TTx1 vector of regimes)
-#  STT <- rep(0,TT)
-#  for (ist in 1:TT) {
-#    STT[ist] <- which(SS[ist,]==1)
-#  }
-#
-#  # Construct transition matrix
-#  transmat <- matrix(0,h,h)
-#
-#  for (ist in 1:(TT-1)) {
-#    transmat[STT[ist+1], STT[ist]] <- transmat[STT[ist+1], STT[ist]] + 1
-#  }
-#
-#  ss <- list(SS=SS,
-#             transitions=transmat)
-#
-#  return(ss)
-# }
-#
-# bingen <- function(prob, Q, st1, h)
-# {
-#  i <- 1
-#  while(i<h)
-#  {
-#    pr0 <- prob[i]*Q[st1,i]/sum(prob[i:h]*Q[st1,i:h])
-#    if(runif(1)<=pr0)
-#    { return(diag(h)[i,]) } else { st1 <- i <- i+1 }
-#  }
-#  return(diag(h)[h,])
-# }

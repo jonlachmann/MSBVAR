@@ -4,7 +4,7 @@
 #
 # 20120621 : Updated to include MSBVAR forecast functions.
 
-"forecast" <- function(varobj, nsteps, A0 = t(chol(varobj$mean.S)),
+forecast <- function(varobj, nsteps, A0 = t(chol(varobj$mean.S)),
                        shocks = matrix(0, nrow = nsteps, ncol = dim(varobj$ar.coefs)[1]),
                        exog.fut = matrix(0, nrow = nsteps, ncol = nrow(varobj$exog.coefs)),
                        N1, N2) {
@@ -35,7 +35,7 @@
 }
 
 # This is the generic VAR forecasting function.  The other
-"forecast.VAR" <-
+forecast.VAR <-
   function(varobj, nsteps, A0, shocks, exog.fut) {
     # Set up the initial parameters for the VAR forecast function from
     #  VAR object
@@ -74,21 +74,21 @@
     return(output)
   }
 
-"forecast.BVAR" <- function(varobj, nsteps, A0, shocks, exog.fut) {
+forecast.BVAR <- function(varobj, nsteps, A0, shocks, exog.fut) {
   output <- forecast.VAR(varobj, nsteps, A0, shocks, exog.fut)
   attr(output, "class") <- c("forecast.BVAR", "mts", "ts")
   attr(output, "eqnames") <- attr(varobj, "eqnames")
   return(output)
 }
 
-"forecast.BSVAR" <- function(varobj, nsteps, A0 = solve(varobj$A0.mode), shocks, exog.fut) {
+forecast.BSVAR <- function(varobj, nsteps, A0 = solve(varobj$A0.mode), shocks, exog.fut) {
   output <- forecast.VAR(varobj, nsteps, A0, shocks, exog.fut)
   attr(output, "class") <- c("forecast.BSVAR", "mts", "ts")
   attr(output, "eqnames") <- attr(varobj, "eqnames")
   return(output)
 }
 
-"uc.forecast" <- function(varobj, nsteps, burnin, gibbs,
+uc.forecast <- function(varobj, nsteps, burnin, gibbs,
                           exog = NULL) {
   if (inherits(varobj, "VAR")) {
     stop("Not implemented for VAR models!\nUse a BVAR with a flat-flat prior if you want this case.\n")
@@ -113,7 +113,7 @@
   }
 }
 
-"uc.forecast.VAR" <- function(varobj, nsteps, burnin, gibbs, exog) { # Extract all the elements from the VAR object
+uc.forecast.VAR <- function(varobj, nsteps, burnin, gibbs, exog) { # Extract all the elements from the VAR object
   y <- varobj$y
   ar.coefs <- varobj$ar.coefs
   intercept <- varobj$intercept
@@ -280,7 +280,7 @@
   return(output)
 }
 
-"hc.forecast" <- function(varobj, yconst, nsteps, burnin, gibbs, exog = NULL) {
+hc.forecast <- function(varobj, yconst, nsteps, burnin, gibbs, exog = NULL) {
   if (inherits(varobj, "VAR")) {
     stop("Not yet implemented for VAR models!\nUse a BVAR model.")
     ##         output <- hc.forecast.VAR(varobj, yconst, nsteps, burnin,
@@ -307,7 +307,7 @@
   }
 }
 
-"hc.forecast.VAR" <-
+hc.forecast.VAR <-
   function(varobj, yconst, nsteps, burnin, gibbs, exog = NULL) {
     # Extract all the elements from the VAR object that we will need
     y <- varobj$y

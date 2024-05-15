@@ -137,20 +137,4 @@ c     Change value of each element along diagonal to zero
 
       END SUBROUTINE MatrixTranspose
 
-ccccccccccccccccccccccccccccccccccccccccccccccccc
-c     Uniform (0,1) random number generator
-c
-c     use R's random number generator directly
-c     the way `Writing R extentions' advertises.
-c
-
-      SUBROUTINE MVUNI(y)
-      DOUBLE PRECISION unifrnd, y
-
-      CALL rndstart()
-      y = unifrnd()
-      CALL rndend()
-      RETURN
-
-      END SUBROUTINE MVUNI
 
