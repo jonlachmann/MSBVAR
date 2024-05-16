@@ -1,3 +1,4 @@
+#' @export
 "szbsvar" <-
   function(Y, p, z = NULL, lambda0, lambda1, lambda3, lambda4, lambda5,
            mu5, mu6, ident, qm = 4) {

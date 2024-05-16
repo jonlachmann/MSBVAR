@@ -35,7 +35,7 @@ N2 <- 1000
 A0.posterior.obj <- gibbs.A0(model, N1, N2, thin=1)
 # Use coda to look at the posterior.
 A0.free <- A02mcmc(A0.posterior.obj)
-win.graph()
+
 #plot(A0.free)
 ```
 

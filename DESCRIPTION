@@ -7,7 +7,16 @@ Authors@R: c(person("Patrick", "Brandt", role=c("aut", "cre"),
              person("W. Ryan", "Davis", role=c("ctb")),
              person("Daniel", "Liu","Tulips", role=c("aut","ctb")))
 Maintainer: Patrick Brandt <pbrandt@utdallas.edu>
-Imports: KernSmooth, xtable, coda, bit, mvtnorm, lattice
+Depends:
+    coda
+Imports:
+    KernSmooth,
+    xtable,
+    coda,
+    bit,
+    mvtnorm,
+    lattice,
+    Rcpp
 Description: Provides methods for estimating frequentist and
   Bayesian Vector Autoregression (VAR) models and Markov-switching
   Bayesian VAR (MSBVAR).  Functions for reduced
@@ -30,7 +39,10 @@ Author: Patrick Brandt [aut, cre],
 Repository: CRAN
 Date/Publication: 2016-11-15 00:14:13
 RoxygenNote: 7.3.1
+Encoding: UTF-8
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+LinkingTo: 
+    Rcpp

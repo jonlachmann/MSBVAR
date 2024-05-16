@@ -13,6 +13,7 @@
 # Workhorse msbvar() function with SZ prior to initialize the posterior
 # of the Gibbs sampler for the MSBVAR models.
 
+#' @export
 msbvar <- function(Y, z = NULL, p, h,
                    lambda0, lambda1, lambda3,
                    lambda4, lambda5, mu5, mu6, qm,

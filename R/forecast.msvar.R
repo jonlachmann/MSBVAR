@@ -4,8 +4,9 @@
 #' @param samples The number of forecast samples to produce
 #' @param Z_init The Z vector to use for prediction, defaults to the last part of Y if left as null
 #' @return An array of forecast samples
+#' @method predict MSVAR
 #' @export
-forecast.msvar <- function (x, h, samples, Z_init = NULL) {
+predict.MSVAR <- function (x, h, samples, Z_init = NULL) {
   state_vec <- seq_len(x$h)
 
   # Decompose sigma matrices for mvnorm draws
@@ -47,3 +48,4 @@ forecast.msvar <- function (x, h, samples, Z_init = NULL) {
   }
   return(forecasts)
 }
+

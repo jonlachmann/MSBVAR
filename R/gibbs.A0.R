@@ -1,3 +1,4 @@
+#' @export
 "gibbs.A0" <- function(varobj, N1, N2, thin = 1, normalization = "DistanceMLA") {
   # Leave the character strings on the R side and pass an int flag
   # to the normalization routine norm_svar (fully documented in
@@ -38,6 +39,7 @@
 
 
 # Converts the A0 object into something that coda can understand.
+#' @export
 "A02mcmc" <- function(x) {
   return(mcmc(
     matrix(x$A0.posterior$A0,

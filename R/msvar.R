@@ -3,7 +3,7 @@
 
 # 20120109 : Initial version by Ryan Davis
 
-
+#' @export
 msvar <- function(Y, p, h, niterblkopt = 10) {
   # Switching indicator: 'IAH' totally switching
   # fixed for now
